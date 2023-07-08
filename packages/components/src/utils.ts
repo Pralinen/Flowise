@@ -202,6 +202,20 @@ export const getAvailableURLs = async (url: string, limit: number) => {
 }
 
 /**
+ * Get env variables
+ * @param {string} url
+ * @param {number} limit
+ * @returns {string[]}
+ */
+export const getEnvironmentVariable = (name: string): string | undefined => {
+    try {
+        return typeof process !== 'undefined' ? process.env?.[name] : undefined
+    } catch (e) {
+        return undefined
+    }
+}
+
+/**
  * Custom chain handler class
  */
 export class CustomChainHandler extends BaseCallbackHandler {
@@ -243,47 +257,6 @@ export class CustomChainHandler extends BaseCallbackHandler {
             this.socketIO.to(this.socketIOClientId).emit('sourceDocuments', outputs?.sourceDocuments)
         }
     }
-}
-
-export const returnJSONStr = (jsonStr: string): string => {
-    let jsonStrArray = jsonStr.split(':')
-
-    let wholeString = ''
-    for (let i = 0; i < jsonStrArray.length; i++) {
-        if (jsonStrArray[i].includes(',') && jsonStrArray[i + 1] !== undefined) {
-            const splitValueAndTitle = jsonStrArray[i].split(',')
-            const value = splitValueAndTitle[0]
-            const newTitle = splitValueAndTitle[1]
-            wholeString += handleEscapeDoubleQuote(value) + ',' + newTitle + ':'
-        } else {
-            wholeString += wholeString === '' ? jsonStrArray[i] + ':' : handleEscapeDoubleQuote(jsonStrArray[i])
-        }
-    }
-    return wholeString
-}
-
-const handleEscapeDoubleQuote = (value: string): string => {
-    let newValue = ''
-    if (value.includes('"')) {
-        const valueArray = value.split('"')
-        for (let i = 0; i < valueArray.length; i++) {
-            if ((i + 1) % 2 !== 0) {
-                switch (valueArray[i]) {
-                    case '':
-                        newValue += '"'
-                        break
-                    case '}':
-                        newValue += '"}'
-                        break
-                    default:
-                        newValue += '\\"' + valueArray[i] + '\\"'
-                }
-            } else {
-                newValue += valueArray[i]
-            }
-        }
-    }
-    return newValue === '' ? value : newValue
 }
 
 export const availableDependencies = [
